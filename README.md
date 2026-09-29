@@ -125,7 +125,7 @@ Les créatifs suivants s'invitent depuis le back-office.
 
 | Sujet | Hypothèse actuelle |
 |---|---|
-| Abonné Pro/Max qui a épuisé son quota | Il peut payer un visuel à l'unité (le brief dit « pas de paiement à l'unité pour les abonnés payants » : on peut à la place bloquer et proposer l'offre supérieure) |
+| Abonné Pro/Max qui a épuisé son quota | **Décidé (29/09/2026)** : il peut payer un visuel à l'unité, au tarif normal (5 000 F statique, 10 000 F vidéo) |
 | Relecture des plans avant envoi | Le client voit son plan tout de suite (écran de chargement 10-20 s) ; l'équipe peut le corriger ensuite, le PDF se met à jour |
 | Kit identité express, fichiers sources | Prévus dans le modèle de données, pas encore vendus (prix à définir) |
 | Durée d'une génération | 20 à 60 s selon la longueur du plan : l'écran de chargement doit le tolérer |
