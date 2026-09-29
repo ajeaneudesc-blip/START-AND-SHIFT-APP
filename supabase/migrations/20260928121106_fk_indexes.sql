@@ -1,0 +1,9 @@
+create index if not exists payments_request_idx on public.payments (request_id);
+create index if not exists plans_brand_idx on public.plans (brand_id);
+create index if not exists plans_parent_idx on public.plans (parent_plan_id);
+create index if not exists requests_brand_idx on public.requests (brand_id);
+create index if not exists requests_plan_idx on public.requests (plan_id);
+create index if not exists requests_usage_period_idx on public.requests (usage_period_id);
+create index if not exists profiles_referred_by_idx on public.profiles (referred_by);
+create index if not exists profiles_active_brand_idx on public.profiles (active_brand_id);
+create index if not exists portfolio_items_request_idx on public.portfolio_items (request_id);

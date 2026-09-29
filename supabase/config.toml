@@ -1,0 +1,34 @@
+# Configuration Supabase CLI (projet distant : umvoxhdicgmpqocvjjpn, région eu-west-3).
+# Lier le dossier :  supabase link --project-ref umvoxhdicgmpqocvjjpn
+# Déployer :         supabase db push   puis   supabase functions deploy
+project_id = "start-and-shift"
+
+# Toutes les fonctions font leur propre contrôle d'accès (session utilisateur, signature
+# de webhook FedaPay / Supabase Auth, ou secret cron) : la vérification JWT de la passerelle
+# est désactivée pour accepter les visiteurs sans compte et les appels serveur à serveur.
+[functions.plans]
+verify_jwt = false
+
+[functions.payments]
+verify_jwt = false
+
+[functions.fedapay-webhook]
+verify_jwt = false
+
+[functions.invoices]
+verify_jwt = false
+
+[functions.auth-sms-hook]
+verify_jwt = false
+
+[functions.admin]
+verify_jwt = false
+
+[functions.notify-dispatch]
+verify_jwt = false
+
+[functions.maintenance]
+verify_jwt = false
+
+[functions.account]
+verify_jwt = false
