@@ -1,5 +1,5 @@
 // Edge Function "payments"
-//   POST /payments/checkout   { purpose: "subscription", tier } | { purpose: "request", request_id }
+//   POST /payments/checkout   { purpose: "subscription", tier } | { purpose: "request" | "source_files", request_id }
 //                             + { method?: "flooz" | "tmoney" | "card", phone? }
 //        → { payment_id, mode: "push" }  (Mobile Money : confirmation sur le téléphone)
 //        → { payment_id, mode: "redirect", checkout_url }  (page FedaPay : carte ou choix du moyen)
@@ -10,12 +10,19 @@ import { createPaymentLink, createTransaction, fedapayConfigured, getTransaction
 import { reconcile } from "../_shared/payments.ts";
 
 interface CheckoutBody {
-  purpose: "subscription" | "request";
+  purpose: "subscription" | "request" | "source_files";
   tier?: "pro" | "max";
   request_id?: string;
   method?: "flooz" | "tmoney" | "card";
   phone?: string;
 }
+
+const PURPOSE_LABEL: Record<string, string> = {
+  creative_unit: "Visuel",
+  express_fee: "Express",
+  identity_kit: "Kit identité",
+  source_files: "Fichiers sources",
+};
 
 const mockPayments = () => Deno.env.get("PAYMENTS_MOCK") === "true" && Deno.env.get("FEDAPAY_ENV") !== "live";
 
@@ -28,14 +35,15 @@ serve("payments", async (req, path) => {
     if (body.purpose === "subscription" && !["pro", "max"].includes(body.tier ?? "")) {
       throw new HttpError(400, "INVALID_TIER", "Choisissez l'offre Pro ou Max.");
     }
-    if (body.purpose === "request" && !body.request_id) throw new HttpError(400, "REQUEST_ID_REQUIRED");
+    if (!["subscription", "request", "source_files"].includes(body.purpose)) throw new HttpError(400, "INVALID_PURPOSE");
+    if (body.purpose !== "subscription" && !body.request_id) throw new HttpError(400, "REQUEST_ID_REQUIRED");
     if (body.method && body.method !== "card" && !MOBILE_MODES[body.method]) throw new HttpError(400, "UNSUPPORTED_METHOD");
 
     const { data: payment, error } = await db.rpc("create_payment", {
       p_user: user.id,
-      p_purpose: body.purpose === "subscription" ? "subscription" : "creative_unit",
+      p_purpose: body.purpose === "subscription" ? "subscription" : body.purpose === "source_files" ? "source_files" : "creative_unit",
       p_tier: body.purpose === "subscription" ? body.tier : null,
-      p_request_id: body.purpose === "request" ? body.request_id : null,
+      p_request_id: body.purpose === "subscription" ? null : body.request_id,
       p_method: body.method ?? null,
     });
     if (error) throw fromPostgrestError(error);
@@ -50,9 +58,9 @@ serve("payments", async (req, path) => {
     const { data: profile } = await db.from("profiles").select("full_name, email, phone").eq("id", user.id).single();
     const [firstname, ...rest] = (profile?.full_name ?? "").trim().split(/\s+/);
     let description = `Start And Shift · Offre ${body.tier === "max" ? "Max" : "Pro"} · 1 mois`;
-    if (body.purpose === "request") {
+    if (body.purpose !== "subscription") {
       const { data: r } = await db.from("requests").select("ref, title").eq("id", payment.request_id).single();
-      description = `Start And Shift · ${payment.purpose === "express_fee" ? "Express" : "Visuel"} ${r?.ref ?? ""} ${r?.title ?? ""}`.trim().slice(0, 200);
+      description = `Start And Shift · ${PURPOSE_LABEL[payment.purpose] ?? "Visuel"} ${r?.ref ?? ""} ${r?.title ?? ""}`.trim().slice(0, 200);
     }
 
     const txn = await createTransaction({

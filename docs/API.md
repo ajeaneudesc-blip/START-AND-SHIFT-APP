@@ -163,6 +163,14 @@ paiement. Réponse : `req.status` = `received` (rien à payer) ou `awaiting_paym
 lecture : `from("request_messages").select("*").eq("request_id", id).order("created_at")`
 (`kind` : `message`, `revision`, `system`).
 
+**Kit identité express** (15 000 F, sans logo) : `create_request` avec `p_type_code: "identity_kit"` — toujours payant,
+jamais pris sur le visuel offert ni le quota.
+
+**Fichiers sources** (5 000 F par visuel, `settings.source_files_price_fcfa`) : bouton visible quand le statut est
+`to_validate` ou `delivered` et que `requests.source_files_paid` est faux → paiement `purpose: "source_files"` (section 6).
+Une fois payés, les fichiers `kind = "source"` deviennent visibles pour le client (l'équipe est prévenue pour les déposer).
+Erreurs : `NOT_DELIVERED_YET`, `ALREADY_PAID`.
+
 **Livrables** : `request_files` avec `kind = "deliverable"` ; téléchargement :
 `storage.from("request-files").createSignedUrl(storage_path, 3600, { download: true })`.
 
@@ -184,6 +192,7 @@ Offres : `from("tiers").select("*").order("sort")` (visible sans compte → page
 const { data } = await supabase.functions.invoke("payments/checkout", {
   body: { purpose: "subscription", tier: "pro", method: "flooz", phone: "+22890123456" },
   // ou { purpose: "request", request_id, method: "tmoney" | "card" }
+  // ou { purpose: "source_files", request_id }   (fichiers sources d'un visuel prêt : 5 000 F)
 });
 ```
 Réponses :
@@ -233,7 +242,8 @@ La même RLS donne à l'équipe la vue sur toutes les demandes, marques, plans, 
 | Demandes | `from("requests").select("*, brands(*), profiles!requests_owner_id_fkey(full_name, phone)")` |
 | Changer le statut | `rpc("staff_set_request_status", { p_request_id, p_status: "in_progress" \| "to_validate" \| ... })` — `to_validate` exige un livrable (`DELIVERABLE_REQUIRED`) |
 | Assigner | `rpc("assign_request", { p_request_id, p_assignee })` |
-| Déposer un livrable | upload `request-files` → `<request_id>/team/<fichier>` puis insert `request_files` (`kind: "deliverable"` ou `"source"`, `format_label: "Story 1080×1920"`) |
+| Déposer un livrable | upload `request-files` → `<request_id>/team/<fichier>` puis insert `request_files` (`kind: "deliverable"`, `format_label: "Story 1080×1920"`) |
+| Déposer les fichiers sources | upload `request-files` → `<request_id>/sources/<fichier>` puis insert `request_files` (`kind: "source"`) — visibles par le client seulement s'il les a payés |
 | Répondre au client | insert `request_messages` (le client est notifié, WhatsApp compris) |
 | Plans | `from("plans").select("*")` ; corriger : `.update({ content, review_note })` (le PDF se régénère) |
 | Clients / paiements | `from("profiles")`, `from("subscriptions")`, `from("payments")`, `from("invoices")` |

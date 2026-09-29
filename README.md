@@ -127,7 +127,7 @@ Les créatifs suivants s'invitent depuis le back-office.
 |---|---|
 | Abonné Pro/Max qui a épuisé son quota | **Décidé (29/09/2026)** : il peut payer un visuel à l'unité, au tarif normal (5 000 F statique, 10 000 F vidéo) |
 | Relecture des plans avant envoi | Le client voit son plan tout de suite (écran de chargement 10-20 s) ; l'équipe peut le corriger ensuite, le PDF se met à jour |
-| Kit identité express, fichiers sources | Prévus dans le modèle de données, pas encore vendus (prix à définir) |
+| Kit identité express, fichiers sources | **Décidé (29/09/2026)** : kit identité 15 000 F (toujours payant, livré sous 5 jours), fichiers sources 5 000 F par visuel (achetables une fois le visuel prêt) |
 | Durée d'une génération | 20 à 60 s selon la longueur du plan : l'écran de chargement doit le tolérer |
 
 ---
